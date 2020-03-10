@@ -25,6 +25,9 @@ export \
 
 # Install custom python package if requirements.txt is present
 if [ -e "/requirements.txt" ]; then
+    echo "==============="
+    pwd
+    echo "==============="
     $(command -v pip) install --user -r /requirements.txt
 fi
 
@@ -53,9 +56,16 @@ if [ "$AIRFLOW__CORE__EXECUTOR" != "SequentialExecutor" ]; then
     : "${POSTGRES_PASSWORD:="airflow"}"
     : "${POSTGRES_DB:="airflow"}"
     : "${POSTGRES_EXTRAS:-""}"
+    #: "${POSTGRES_USER_1:="jackson"}"
+    #: "${POSTGRES_PASSWORD_1:="123456"}"
+    #: "${POSTGRES_DB_1:="stockdata"}"
+    #: "${POSTGRES_EXTRAS_1:-""}"
 
     AIRFLOW__CORE__SQL_ALCHEMY_CONN="postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}${POSTGRES_EXTRAS}"
     export AIRFLOW__CORE__SQL_ALCHEMY_CONN
+
+    # AIRFLOW__STOCKDATA__SQL_ALCHEMY_CONN="postgresql+psycopg2://${POSTGRES_USER_1}:${POSTGRES_PASSWORD_1}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_1}${POSTGRES_EXTRAS_1}"
+    # export AIRFLOW__STOCKDATA__SQL_ALCHEMY_CONN
 
     # Check if the user has provided explicit Airflow configuration for the broker's connection to the database
     if [ "$AIRFLOW__CORE__EXECUTOR" = "CeleryExecutor" ]; then
@@ -114,6 +124,10 @@ case "$1" in
       # With the "Local" and "Sequential" executors it should all run in one container.
       airflow scheduler &
     fi
+    # Execute below to create login user
+    echo "##########"
+    pwd
+    echo "##########"
     exec airflow webserver
     ;;
   worker|scheduler)

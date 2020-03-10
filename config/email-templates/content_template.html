@@ -1,0 +1,34 @@
+<table>
+  <tbody>
+    <tr>
+      <td style="text-align: right;">DAG Start Time:</td>
+      <td>{{dag_run.start_date}}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">DAG End Time:</td>
+      <td>{{dag_run.end_date if dag_run.end_date != None else ti.end_date}}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Process Duration:</td>
+      <td>{{ duration }}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Status:</td>
+      <td>{{ti.state}}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">DAG Tags:</td>
+      <td>{{dag.tags}}</td>
+    </tr>
+    {% if ti.state != "success" %}
+    <tr>
+      <td style="text-align: right;">Task:</td>
+      <td>{{ti.task_id}}</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Log URL:</td>
+      <td>{{ti.log_url}}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>

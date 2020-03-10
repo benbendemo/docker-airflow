@@ -28,6 +28,15 @@ ENV LC_MESSAGES en_US.UTF-8
 # Disable noisy "Handling signal" log messages:
 # ENV GUNICORN_CMD_ARGS --log-level WARNING
 
+COPY script/entrypoint.sh /entrypoint.sh
+COPY script/airflow_create_user.py ${AIRFLOW_USER_HOME}/airflow_create_user.py
+COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
+COPY config/pip.conf /etc/pip.conf
+COPY config/apt-source.list /etc/apt/sources.list
+COPY config/email-templates ${AIRFLOW_USER_HOME}/email-templates
+COPY config/airflow-common-library-master ${AIRFLOW_USER_HOME}/airflow-common-library-master
+
+
 RUN set -ex \
     && buildDeps=' \
         freetds-dev \
@@ -50,6 +59,8 @@ RUN set -ex \
         rsync \
         netcat \
         locales \
+        vim \
+        lsof \
     && sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
@@ -61,6 +72,10 @@ RUN set -ex \
     && pip install pyasn1 \
     && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
+    && pip install -r ${AIRFLOW_USER_HOME}/airflow-common-library-master/requirements.txt \
+    && cd ${AIRFLOW_USER_HOME}/airflow-common-library-master \
+    && python setup.py install \
+    && cd - \
     && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
     && apt-get purge --auto-remove -yqq $buildDeps \
     && apt-get autoremove -yqq --purge \
@@ -73,12 +88,9 @@ RUN set -ex \
         /usr/share/doc \
         /usr/share/doc-base
 
-COPY script/entrypoint.sh /entrypoint.sh
-COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
-
 RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 
-EXPOSE 8080 5555 8793
+EXPOSE 8080 5555 8793 5000
 
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}

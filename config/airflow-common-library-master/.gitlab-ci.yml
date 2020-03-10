@@ -1,0 +1,48 @@
+stages:
+  - Test
+  - PostTest
+  - Build
+  - Push
+
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .cache/pip
+    - venv/
+
+Test:
+  stage: Test
+  image: python:3.7
+  before_script:
+    - python -V               # Print out python version for debugging
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+  script:
+    - python setup.py test
+  artifacts:
+    paths:
+      - htmlcov/
+
+Build:
+  stage: Build
+  image: python:3.7-slim
+  script:
+    - python setup.py sdist
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - master
+
+Push:
+  image: canopyiq/twine
+  stage: Push
+  script:
+    - twine upload --repository-url ${NEXUS_PIP_URL} -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} dist/*
+  only:
+    - master
+

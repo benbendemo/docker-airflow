@@ -1,0 +1,8 @@
+dist/
+.eggs/
+*.egg-info/
+__pycache__/
+.venv/
+htmlcov/
+.coverage
+*.pyc
