@@ -125,9 +125,11 @@ case "$1" in
       airflow scheduler &
     fi
     # Execute below to create login user
-    echo "##########"
+    echo "##### begin create user #####"
     pwd
-    echo "##########"
+    exec airflow create_user -r Admin -u admingcp -e admin@example.com -f admin -l user -p testadmingcp
+    sleep 10
+    echo "##### end create user #####"
     exec airflow webserver
     ;;
   worker|scheduler)
