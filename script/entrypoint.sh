@@ -125,11 +125,9 @@ case "$1" in
       airflow scheduler &
     fi
     # Execute below to create login user
-    echo "##### begin create user #####"
+    echo "##### begin pwd #####"
     pwd
-    exec airflow create_user -r Admin -u admingcp -e admin@example.com -f admin -l user -p testadmingcp
-    sleep 10
-    echo "##### end create user #####"
+    echo "##### end pwd #####"
     exec airflow webserver
     ;;
   worker|scheduler)
@@ -143,6 +141,12 @@ case "$1" in
     ;;
   version)
     exec airflow "$@"
+    ;;
+  createuser)
+    echo "##### begin create user #####"
+    sleep 10
+    exec airflow create_user -r Admin -u admin -e admin@example.com -f admin -l user -p testadmin
+    echo "##### end create user #####"
     ;;
   *)
     # The command is something like bash, not an airflow subcommand. Just run it in the right environment.
